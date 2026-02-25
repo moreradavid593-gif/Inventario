@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario</title>
+
+    <style>
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f2f2f2;
+            padding: 30px;
+        }
+
+       
+        .container {
+            max-width: 750px;
+            margin: auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+       
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            margin-top: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            background: #fafafa;
+        }
+
+        input:focus {
+            border-color: #888;
+        }
+
+        
+        button {
+            margin-top: 18px;
+            width: 100%;
+            padding: 12px;
+            background: #4a76a8; 
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #365a80;
+        }
+
+        
+        .producto {
+            background: #fafafa;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .producto strong {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .acciones {
+            margin-top: 10px;
+        }
+
+        .acciones button {
+            width: auto;
+            padding: 8px 14px;
+            margin-right: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: #f1c40f;
+        }
+
+        .edit-btn:hover {
+            background: #d4ac0d;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 25px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Inventario</h1>
+
+        <input type="text" id="nombre" placeholder="Nombre del producto">
+        <input type="number" id="cantidad" placeholder="Cantidad">
+        <input type="number" id="precio" placeholder="Precio">
+
+        <button onclick="agregarProducto()">Guardar Producto</button>
+
+        <h2>Inventario Registrado</h2>
+        <div id="lista"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", mostrarProductos);
+
+        function obtenerProductos() {
+            return JSON.parse(localStorage.getItem("inventario")) || [];
+        }
+
+        function guardarProductos(lista) {
+            localStorage.setItem("inventario", JSON.stringify(lista));
+        }
+
+        function agregarProducto() {
+            const nombre = document.getElementById("nombre").value;
+            const cantidad = document.getElementById("cantidad").value;
+            const precio = document.getElementById("precio").value;
+
+            if (!nombre || !cantidad || !precio) {
+                alert("Por favor completa todos los campos");
+                return;
+            }
+
+            let inventario = obtenerProductos();
+            const index = inventario.findIndex(p => p.nombre === nombre);
+
+            const producto = { nombre, cantidad, precio };
+
+            if (index === -1) {
+                inventario.push(producto);
+            } else {
+                inventario[index] = producto;
+            }
+
+            guardarProductos(inventario);
+            mostrarProductos();
+            limpiarCampos();
+        }
+
+        function limpiarCampos() {
+            document.getElementById("nombre").value = "";
+            document.getElementById("cantidad").value = "";
+            document.getElementById("precio").value = "";
+        }
+
+        function mostrarProductos() {
+            const listaDiv = document.getElementById("lista");
+            listaDiv.innerHTML = "";
+
+            const inventario = obtenerProductos();
+
+            inventario.forEach((p, i) => {
+                listaDiv.innerHTML += `
+                    <div class="producto">
+                        <strong>${p.nombre}</strong><br>
+                        Cantidad: ${p.cantidad}<br>
+                        Precio: $${p.precio}
+                        <div class="acciones">
+                            <button class="edit-btn" onclick="editarProducto(${i})">Editar</button>
+                            <button class="delete-btn" onclick="eliminarProducto(${i})">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function editarProducto(i) {
+            const inventario = obtenerProductos();
+            const p = inventario[i];
+
+            document.getElementById("nombre").value = p.nombre;
+            document.getElementById("cantidad").value = p.cantidad;
+            document.getElementById("precio").value = p.precio;
+        }
+
+        function eliminarProducto(i) {
+            let inventario = obtenerProductos();
+            inventario.splice(i, 1);
+            guardarProductos(inventario);
+            mostrarProductos();
+        }
+    </script>
+
+</body>
+</html>
